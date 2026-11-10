@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Controle Green Blue</title>
+<meta name="theme-color" content="#0e6b5c">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Green Blue">
+<style>
+:root{
+  --bg:#f2f5f4; --surface:#ffffff; --ink:#14201d; --muted:#53655f; --line:#d7e0dd;
+  --accent:#0e6b5c; --accent-ink:#ffffff; --danger:#b3261e; --ok:#1e7a4c; --warn:#a35f08; --neg:#b3261e;
+  --font:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){--bg:#0d1513; --surface:#16211e; --ink:#e6eeeb; --muted:#92a8a1; --line:#283833;
+    --accent:#4fc3ad; --accent-ink:#08201b; --danger:#f2938b; --ok:#5cc690; --warn:#e0a252; --neg:#f2938b; color-scheme:dark}
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.4;
+  padding-block:16px 96px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button,input,textarea,select{font:inherit;color:inherit}
+.wrap{max-width:960px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+h1{font-size:22px;font-weight:600;margin:0;letter-spacing:-.01em}
+.sub{color:var(--muted);font-size:13px}
+.logo-sm{width:44px;height:44px;border-radius:10px;flex:none}
+.logo-lg{width:96px;height:96px;border-radius:18px;align-self:center}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:9px 14px;cursor:pointer;font-weight:500;min-height:40px}
+.btn:hover{border-color:var(--accent)}
+.btn:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,.row:focus-visible,.chip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.small{min-height:34px;padding:6px 10px;font-size:13px}
+.btn.danger{color:var(--danger);border-color:var(--danger)}
+.acts{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.kpi .lb{font-size:12px;color:var(--muted);font-weight:500}
+.kpi .n{font-size:18px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.kpi .t{font-size:12px;color:var(--muted)}
+.neg{color:var(--neg)}.pos{color:var(--ok)}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;cursor:pointer;font-size:13px;min-height:34px}
+.chip[aria-pressed="true"]{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,var(--surface));color:var(--accent);font-weight:600}
+.search,input,textarea,select.f{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:9px 10px;width:100%;min-height:40px}
+select.m{width:auto;min-height:34px;padding:4px 8px;border:1px solid var(--line);background:var(--surface);border-radius:8px}
+.list{display:flex;flex-direction:column;gap:10px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.row{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;padding:12px 14px;cursor:pointer;border-radius:10px}
+.row .l{min-width:0;display:flex;flex-direction:column;gap:2px}
+.cod{font-weight:600}
+.desc{color:var(--muted);font-size:14px}
+.meta{color:var(--muted);font-size:12px}
+.r{text-align:right;display:flex;flex-direction:column;gap:2px;align-items:flex-end;flex-shrink:0}
+.val{font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tag{font-size:11px;border-radius:999px;padding:2px 8px;border:1px solid currentColor;white-space:nowrap}
+.t-pago{color:var(--ok)}.t-ag{color:var(--warn)}.t-sn{color:var(--muted)}
+.empty{border:1px dashed var(--line);border-radius:10px;padding:28px 16px;text-align:center;color:var(--muted)}
+.banner{border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--muted);background:var(--surface)}
+.overlay{position:fixed;inset:0;background:rgba(5,12,10,.55);z-index:20;overflow-y:auto;padding:max(12px,env(safe-area-inset-top,0px)) max(12px,env(safe-area-inset-right,0px)) max(12px,env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px))}
+.sheet{max-width:620px;margin:0 auto;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.sheet h2{margin:0;font-size:18px}
+.fld{display:flex;flex-direction:column;gap:4px;min-width:0}
+.fld>span{font-size:13px;color:var(--muted);font-weight:500}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+@media (max-width:520px){.g3{grid-template-columns:1fr 1fr}}
+.sec{font-size:12px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.04em;margin-top:4px}
+.calc{border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:4px;background:color-mix(in srgb,var(--accent) 5%,var(--surface))}
+.calc div{display:flex;justify-content:space-between;font-variant-numeric:tabular-nums}
+.calc .big{font-weight:700;font-size:16px;border-top:1px solid var(--line);padding-top:6px;margin-top:2px}
+.err{color:var(--danger);font-size:13px;min-height:1em}
+.foot{display:flex;gap:8px;justify-content:space-between;flex-wrap:wrap}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;font-size:14px;z-index:30;max-width:calc(100% - 32px)}
+</style></head><body>
+<div class="wrap" id="app"></div>
+<div id="sheet"></div>
+<div id="toast" hidden class="toast" role="status"></div>
+<script type="module">
+import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+import {initializeFirestore,persistentLocalCache,persistentMultipleTabManager,collection,doc,onSnapshot,setDoc,updateDoc,deleteDoc,getDocs,getDoc} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+import {firebaseConfig} from './firebase-config.js';
+
+const ADMIN='adilsonzanghelini@gmail.com';
+const BRL=new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'});
+const money=n=>BRL.format(n||0);
+const pctf=n=>(isFinite(n)?(n*100).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1}):'0,0')+'%';
+const $=s=>document.querySelector(s);
+function h(tag,props,...kids){
+  const e=document.createElement(tag);
+  for(const k in props||{}){const v=props[k];if(v==null||v===false)continue;
+    if(k==='class')e.className=v;else if(k==='text')e.textContent=v;
+    else if(k.startsWith('on'))e.addEventListener(k.slice(2),v);
+    else if(k==='value')e.value=v;else e.setAttribute(k,v===true?'':v);}
+  for(const c of kids.flat()){if(c==null||c===false)continue;e.append(c.nodeType?c:document.createTextNode(c))}
+  return e;
+}
+function parseBR(s){s=String(s==null?'':s).trim();if(s.includes(','))s=s.replace(/\./g,'').replace(',','.');const n=parseFloat(s);return isFinite(n)?n:0}
+const numIn=n=>n?String(n).replace('.',','):'';
+const fd=d=>d?String(d).split('-').reverse().join('/'):'';
+let tt;function toast(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,3200)}
+const emsg=e=>e&&e.code==='permission-denied'?'Sem permissão para essa ação.':'Não foi possível salvar. Verifique a internet e tente de novo.';
+
+// Cálculos (mesma lógica da planilha)
+function calc(x){
+  const qtd=+x.qtd||0,custo=qtd*(+x.compra||0),rec=qtd*(+x.venda||0);
+  const icms=(x.icmsPct!=null&&x.icmsPct!=='')?rec*(+x.icmsPct||0)/100:(+x.icms||0);
+  const desp=custo+icms+(+x.frete||0),lucro=rec-desp;
+  return{custo,icms,desp,rec,lucro,pct:rec?lucro/rec:0,mk:custo?lucro/custo:0};
+}
+const icmsPctOf=x=>{if(x.icmsPct!=null&&x.icmsPct!=='')return +x.icmsPct;const r=(+x.qtd||0)*(+x.venda||0);return r?Math.round((+x.icms||0)/r*10000)/100:4};
+const status=x=>!x.nota?'sn':(x.pagoEm?'pago':'ag');
+const STL={sn:'Sem nota',ag:'Aguardando pagamento',pago:'Pago'};
+
+let fs=null,meEmail='',isAdmin=false,papel='ver',items=[],loading=true,err='',unsub=null;
+let fStatus='todos',fMes='todos',q='';
+
+async function boot(){
+  const app=initializeApp(firebaseConfig);const auth=getAuth(app);
+  fs=initializeFirestore(app,{localCache:persistentLocalCache({tabManager:persistentMultipleTabManager()})});
+  window._auth=auth;
+  onAuthStateChanged(auth,async u=>{
+    if(unsub){unsub();unsub=null}
+    if(!u){items=[];err='';loading=false;renderLogin();return}
+    meEmail=(u.email||'').toLowerCase();isAdmin=meEmail===ADMIN;papel='ver';loading=true;err='';render();
+    try{
+      if(isAdmin)papel='editar';
+      else{const sn=await getDoc(doc(fs,'gb_acessos',meEmail));if(!sn.exists()){err='noaccess';loading=false;render();return}papel=sn.data().papel==='editar'?'editar':'ver'}
+    }catch(e){err='noaccess';loading=false;render();return}
+    unsub=onSnapshot(collection(fs,'gb_lancamentos'),snap=>{
+      items=snap.docs.map(d=>({...d.data(),id:d.id}));loading=false;err='';render();
+    },e=>{err=e.code||'x';loading=false;render()});
+  });
+}
+const canW=()=>papel==='editar';
+
+function renderLogin(){
+  const app=$('#app');app.textContent='';$('#sheet').textContent='';
+  const em=h('input',{type:'email',autocomplete:'username',placeholder:'E-mail',inputmode:'email'});
+  const pw=h('input',{type:'password',autocomplete:'current-password',placeholder:'Senha'});
+  const er=h('div',{class:'err',role:'alert'});
+  const go=async()=>{er.textContent='';
+    try{await signInWithEmailAndPassword(window._auth,em.value.trim(),pw.value)}
+    catch(e){er.textContent=(e.code==='auth/network-request-failed')?'Sem internet.':'E-mail ou senha incorretos.'}};
+  pw.addEventListener('keydown',e=>{if(e.key==='Enter')go()});
+  app.append(h('div',{class:'sheet',style:'margin-top:12vh'},
+    h('img',{src:'logo.png',alt:'Green Blue',class:'logo-lg'}),h('h1',{text:'Controle Green Blue'}),h('div',{class:'sub',text:'Entre com o acesso que o administrador criou para você.'}),
+    h('label',{class:'fld'},h('span',{text:'E-mail'}),em),h('label',{class:'fld'},h('span',{text:'Senha'}),pw),er,
+    h('button',{class:'btn primary',text:'Entrar',onclick:go})));
+}
+
+function monthsOf(){
+  const s=new Set(items.map(x=>(x.emissao||'').slice(0,7)).filter(Boolean));
+  return [...s].sort().reverse();
+}
+const mlabel=m=>{const[y,mo]=m.split('-');return['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'][+mo-1]+'/'+y};
+function filtered(){
+  const t=q.trim().toLowerCase();
+  return items.filter(x=>(fMes==='todos'||(x.emissao||'').slice(0,7)===fMes)&&(fStatus==='todos'||status(x)===fStatus)
+    &&(!t||[x.codigo,x.descricao,x.nota].some(v=>String(v||'').toLowerCase().includes(t))))
+    .sort((a,b)=>String(b.emissao||b.createdAt||'').localeCompare(String(a.emissao||a.createdAt||''))||(b.createdAt||0)-(a.createdAt||0));
+}
+
+function render(){
+  const app=$('#app');app.textContent='';
+  if(loading){app.append(h('div',{class:'empty',style:'margin-top:20vh',text:'Carregando…'}));return}
+  if(err==='noaccess'){app.append(h('div',{class:'sheet',style:'margin-top:12vh'},h('h1',{text:'Sem acesso'}),
+    h('div',{class:'sub',text:'Seu e-mail ainda não foi liberado neste painel. Peça ao administrador.'}),
+    h('button',{class:'btn',text:'Sair',onclick:()=>signOut(window._auth)})));return}
+  const list=filtered();
+  const T=list.reduce((a,x)=>{const c=calc(x);a.desp+=c.desp;a.rec+=c.rec;a.lucro+=c.lucro;a.custo+=c.custo;
+    if(x.nota){if(x.pagoEm)a.recebido+=(+x.valorNota||c.rec);else a.areceber+=(+x.valorNota||c.rec)}return a},{desp:0,rec:0,lucro:0,custo:0,recebido:0,areceber:0});
+  const pct=T.rec?T.lucro/T.rec:0;
+  app.append(h('header',{},
+    h('img',{src:'logo.png',alt:'Green Blue',class:'logo-sm'}),h('div',{style:'flex:1;min-width:0'},h('h1',{text:'Controle Green Blue'}),h('div',{class:'sub',text:meEmail+(canW()?'':' · somente leitura')})),
+    h('div',{class:'acts'},
+      canW()?h('button',{class:'btn primary',text:'Novo lançamento',onclick:()=>openForm(null)}):null,
+      h('button',{class:'btn',text:'Exportar CSV',onclick:()=>exportCsv(list)}),
+      isAdmin?h('button',{class:'btn',text:'Acessos',onclick:openAcessos}):null,
+      h('button',{class:'btn',text:'Sair',onclick:()=>signOut(window._auth)}))));
+  if(err)app.append(h('div',{class:'banner',text:'Não foi possível carregar. Verifique a internet.'}));
+  app.append(h('div',{class:'cards'},
+    kpi('Despesas',money(T.desp),'compra + ICMS + frete'),
+    kpi('Receita de venda',money(T.rec),list.length+' lançamento(s)'),
+    kpi('Lucro',money(T.lucro),'',T.lucro<0?'neg':'pos'),
+    kpi('% de lucro',pctf(pct),'sobre a venda',pct<0?'neg':'pos'),
+    kpi('A receber',money(T.areceber),'nota emitida, não paga'),
+    kpi('Recebido',money(T.recebido),'notas pagas')));
+  const meses=monthsOf();
+  app.append(h('div',{class:'bar'},
+    ['todos','ag','pago','sn'].map(k=>h('button',{class:'chip','aria-pressed':String(fStatus===k),text:k==='todos'?'Todos':STL[k],onclick:()=>{fStatus=k;render()}})),
+    h('select',{class:'m','aria-label':'Mês de emissão',onchange:e=>{fMes=e.target.value;render()}},
+      h('option',{value:'todos',text:'Todos os meses',selected:fMes==='todos'}),meses.map(m=>h('option',{value:m,text:mlabel(m),selected:fMes===m})))));
+  const s=h('input',{class:'search',type:'search',placeholder:'Buscar por código, descrição ou nº da nota',value:q,'aria-label':'Buscar'});
+  s.addEventListener('input',()=>{q=s.value;const p=s.selectionStart;render();const n=$('.search');n.focus();try{n.setSelectionRange(p,p)}catch(e){}});
+  app.append(s);
+  if(!list.length)app.append(h('div',{class:'empty',text:items.length?'Nada encontrado com esses filtros.':'Nenhum lançamento ainda. Toque em "Novo lançamento".'}));
+  else app.append(h('div',{class:'list'},list.map(rowEl)));
+}
+function kpi(l,v,t,cls){return h('div',{class:'kpi'},h('span',{class:'lb',text:l}),h('span',{class:'n '+(cls||''),text:v}),t?h('span',{class:'t',text:t}):null)}
+function rowEl(x){
+  const c=calc(x),st=status(x);
+  return h('div',{class:'card'},h('div',{class:'row',tabindex:'0',role:'button',onclick:()=>openForm(x),onkeydown:e=>{if(e.key==='Enter')openForm(x)}},
+    h('div',{class:'l'},h('span',{class:'cod',text:(x.codigo||'(sem código)')}),h('span',{class:'desc',text:x.descricao||''}),
+      h('span',{class:'meta',text:[x.qtd+' un.','compra '+money(x.compra),'venda '+money(x.venda),'ICMS '+pctf(calc(x).rec?calc(x).icms/calc(x).rec:0)+' ('+money(calc(x).icms)+')','frete '+money(x.frete)].join(' · ')}),
+      h('span',{class:'meta',text:x.nota?('Nota '+x.nota+(x.emissao?' · emitida '+fd(x.emissao):'')+(x.valorNota?' · '+money(x.valorNota):'')+(x.pagoEm?' · pago em '+fd(x.pagoEm):'')):'Nota ainda não emitida'})),
+    h('div',{class:'r'},h('span',{class:'val '+(c.lucro<0?'neg':'pos'),text:money(c.lucro)}),h('span',{class:'meta',text:pctf(c.pct)+' de lucro'}),
+      h('span',{class:'tag t-'+st,text:STL[st]}))));
+}
+
+function openForm(x){
+  const sheet=$('#sheet');sheet.textContent='';
+  const ro=!canW();
+  const f={
+    codigo:h('input',{value:x?.codigo||'',placeholder:'Código do produto',autocomplete:'off'}),
+    descricao:h('input',{value:x?.descricao||'',placeholder:'Descrição do produto',autocomplete:'off'}),
+    qtd:h('input',{value:x?numIn(x.qtd):'1',inputmode:'decimal'}),
+    compra:h('input',{value:x?numIn(x.compra):'',inputmode:'decimal',placeholder:'0,00'}),
+    venda:h('input',{value:x?numIn(x.venda):'',inputmode:'decimal',placeholder:'0,00'}),
+    icms:h('input',{value:x?numIn(icmsPctOf(x)):'4',inputmode:'decimal',placeholder:'4,00'}),
+    frete:h('input',{value:x?numIn(x.frete):'',inputmode:'decimal',placeholder:'0,00'}),
+    nota:h('input',{value:x?.nota||'',placeholder:'Nº da nota',inputmode:'numeric'}),
+    emissao:h('input',{type:'date',value:x?.emissao||''}),
+    valorNota:h('input',{value:x?numIn(x.valorNota):'',inputmode:'decimal',placeholder:'0,00'}),
+    pagoEm:h('input',{type:'date',value:x?.pagoEm||''}),
+    obs:h('textarea',{rows:'2',placeholder:'Observação (opcional)'})
+  };
+  f.obs.value=x?.obs||'';
+  if(ro)Object.values(f).forEach(i=>i.disabled=true);
+  const prev=h('div',{class:'calc'});
+  const cur=()=>{const o={qtd:parseBR(f.qtd.value),compra:parseBR(f.compra.value),venda:parseBR(f.venda.value),icmsPct:parseBR(f.icms.value),frete:parseBR(f.frete.value)};o.icms=+calc(o).icms.toFixed(2);return o};
+  const upd=()=>{const c=calc(cur());prev.textContent='';
+    const ln=(a,b,cls)=>h('div',{class:cls||''},h('span',{text:a}),h('span',{text:b}));
+    prev.append(ln('Custo dos produtos',money(c.custo)),ln('ICMS ('+pctf((parseBR(f.icms.value)||0)/100)+' da venda)',money(c.icms)),ln('Despesas (custo + ICMS + frete)',money(c.desp)),ln('Receita de venda',money(c.rec)),
+      h('div',{class:'big '+(c.lucro<0?'neg':'pos')},h('span',{text:'Lucro'}),h('span',{text:money(c.lucro)})),
+      ln('% de lucro (sobre a venda)',pctf(c.pct)),ln('% sobre o custo',pctf(c.mk)))};
+  ['qtd','compra','venda','icms','frete'].forEach(k=>f[k].addEventListener('input',upd));upd();
+  const er=h('div',{class:'err',role:'alert'});const close=()=>{sheet.textContent=''};
+  const L=(t,el)=>h('label',{class:'fld'},h('span',{text:t}),el);
+  const read=()=>({codigo:f.codigo.value.trim(),descricao:f.descricao.value.trim(),...cur(),nota:f.nota.value.trim(),emissao:f.emissao.value,
+    valorNota:parseBR(f.valorNota.value),pagoEm:f.pagoEm.value,obs:f.obs.value.trim()});
+  const save=async()=>{
+    const d=read();
+    if(!d.codigo&&!d.descricao){er.textContent='Informe o código ou a descrição.';return}
+    if(!d.qtd){er.textContent='Informe a quantidade.';return}
+    if(d.pagoEm&&!d.nota){er.textContent='Para informar o pagamento, preencha o número da nota.';return}
+    try{const now=Date.now();
+      if(x)await updateDoc(doc(fs,'gb_lancamentos',x.id),{...d,updatedAt:now,updatedBy:meEmail});
+      else await setDoc(doc(collection(fs,'gb_lancamentos')),{...d,createdAt:now,createdBy:meEmail,updatedAt:now});
+      toast(x?'Lançamento atualizado':'Lançamento criado');close()}catch(e){er.textContent=emsg(e)}};
+  const del=async()=>{if(!confirm('Excluir este lançamento?'))return;
+    try{await deleteDoc(doc(fs,'gb_lancamentos',x.id));toast('Lançamento excluído');close()}catch(e){er.textContent=emsg(e)}};
+  const dup=async()=>{const d=read();try{const now=Date.now();await setDoc(doc(collection(fs,'gb_lancamentos')),{...d,nota:'',emissao:'',valorNota:0,pagoEm:'',createdAt:now,createdBy:meEmail,updatedAt:now});toast('Duplicado (sem dados da nota)');close()}catch(e){er.textContent=emsg(e)}};
+  const useRec=h('button',{class:'btn small',type:'button',text:'Usar a receita de venda',onclick:()=>{f.valorNota.value=numIn(+calc(cur()).rec.toFixed(2))}});
+  sheet.append(h('div',{class:'overlay',onclick:e=>{if(e.target.classList.contains('overlay'))close()}},
+    h('div',{class:'sheet',role:'dialog','aria-modal':'true'},h('h2',{text:x?'Lançamento':'Novo lançamento'}),
+      h('div',{class:'sec',text:'Produto'}),
+      h('div',{class:'g2'},L('Código',f.codigo),L('Quantidade',f.qtd)),L('Descrição do produto',f.descricao),
+      h('div',{class:'sec',text:'Valores'}),
+      h('div',{class:'g2'},L('Valor de compra (unit.)',f.compra),L('Valor de venda (unit.)',f.venda)),
+      h('div',{class:'g2'},L('ICMS (%) — sugerido 4%',f.icms),L('Frete (R$, total)',f.frete)),
+      prev,
+      h('div',{class:'sec',text:'Nota fiscal e pagamento'}),
+      h('div',{class:'g3'},L('Nº da nota',f.nota),L('Data de emissão',f.emissao),L('Valor da nota (R$)',f.valorNota)),
+      ro?null:h('div',{class:'acts'},useRec),
+      L('Data em que foi pago',f.pagoEm),L('Observação',f.obs),er,
+      h('div',{class:'foot'},h('button',{class:'btn',type:'button',text:'Fechar',onclick:close}),
+        ro?null:h('div',{class:'acts'},x?h('button',{class:'btn danger',type:'button',text:'Excluir',onclick:del}):null,
+          x?h('button',{class:'btn',type:'button',text:'Duplicar',onclick:dup}):null,
+          h('button',{class:'btn primary',type:'button',text:'Salvar',onclick:save}))))));
+  (x?f.valorNota:f.codigo).focus();
+}
+
+function exportCsv(list){
+  const hd=['Código','Descrição','Qtd','Compra unit.','Venda unit.','ICMS %','ICMS R$','Frete','Nº nota','Emissão','Valor nota','Pago em','Custo','Despesas','Receita','Lucro','% lucro','% sobre custo','Situação'];
+  const n=v=>String(Math.round((+v||0)*100)/100).replace('.',',');
+  const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+  const rows=list.map(x=>{const c=calc(x);return[x.codigo,x.descricao,n(x.qtd),n(x.compra),n(x.venda),n(icmsPctOf(x)),n(c.icms),n(x.frete),x.nota,fd(x.emissao),n(x.valorNota),fd(x.pagoEm),n(c.custo),n(c.desp),n(c.rec),n(c.lucro),n(c.pct*100),n(c.mk*100),STL[status(x)]].map(q).join(';')});
+  const blob=new Blob(['﻿'+[hd.map(q).join(';'),...rows].join('\r\n')],{type:'text/csv;charset=utf-8'});
+  const a=h('a',{href:URL.createObjectURL(blob),download:'controle-green-blue.csv'});document.body.append(a);a.click();a.remove();
+}
+
+async function openAcessos(){
+  const sheet=$('#sheet');sheet.textContent='';
+  let list=[];try{list=(await getDocs(collection(fs,'gb_acessos'))).docs.map(d=>({id:d.id,...d.data()}))}catch(e){}
+  const em=h('input',{type:'email',placeholder:'e-mail do usuário',inputmode:'email'});
+  const pp=h('select',{class:'f'},h('option',{value:'editar',text:'Pode lançar e editar'}),h('option',{value:'ver',text:'Somente ver'}));
+  const er=h('div',{class:'err',role:'alert'});const close=()=>{sheet.textContent=''};
+  const save=async()=>{const id=em.value.trim().toLowerCase();if(!id.includes('@')){er.textContent='Informe o e-mail.';return}
+    try{await setDoc(doc(fs,'gb_acessos',id),{papel:pp.value});toast('Acesso salvo');openAcessos()}catch(e){er.textContent=emsg(e)}};
+  sheet.append(h('div',{class:'overlay',onclick:e=>{if(e.target.classList.contains('overlay'))close()}},
+    h('div',{class:'sheet',role:'dialog','aria-modal':'true'},h('h2',{text:'Quem acessa o Controle Green Blue'}),
+      h('div',{class:'meta',text:'Primeiro crie o usuário (e-mail e senha) no Firebase, em Authentication. Aqui você libera o acesso dele a este painel. Esses acessos são só da Green Blue e não dão acesso às OS.'}),
+      list.length?list.map(x=>h('div',{class:'acts'},h('span',{text:x.id+' · '+(x.papel==='editar'?'edita':'só vê'),style:'flex:1'}),
+        h('button',{class:'btn small',text:'Remover',onclick:async()=>{try{await deleteDoc(doc(fs,'gb_acessos',x.id));openAcessos()}catch(e){er.textContent=emsg(e)}}}))):h('div',{class:'meta',text:'Nenhum usuário liberado ainda.'}),
+      h('label',{class:'fld'},h('span',{text:'E-mail'}),em),h('label',{class:'fld'},h('span',{text:'Permissão'}),pp),er,
+      h('div',{class:'foot'},h('button',{class:'btn',type:'button',text:'Fechar',onclick:close}),h('button',{class:'btn primary',type:'button',text:'Salvar acesso',onclick:save})))));
+  em.focus();
+}
+
+boot();
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script></body></html>
