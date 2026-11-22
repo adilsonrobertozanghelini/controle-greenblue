@@ -65,6 +65,7 @@ select.m{width:auto;min-height:34px;padding:4px 8px;border:1px solid var(--line)
 .sheet h2{margin:0;font-size:18px}
 .fld{display:flex;flex-direction:column;gap:4px;min-width:0}
 .fld>span{font-size:13px;color:var(--muted);font-weight:500}
+.stepper{display:flex;gap:6px;align-items:stretch}.stepper input{flex:1;min-width:0;text-align:center}.stepper .btn{min-width:42px;padding:6px 0;font-size:18px;line-height:1}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 @media (max-width:520px){.g3{grid-template-columns:1fr 1fr}}
@@ -251,7 +252,12 @@ function openForm(x){
       h('div',{class:'big '+(c.lucro<0?'neg':'pos')},h('span',{text:'Lucro'}),h('span',{text:money(c.lucro)})),
       ln('% de lucro (sobre a venda)',pctf(c.pct)),ln('% sobre o custo',pctf(c.mk)))};
   ['qtd','compra','venda','icms','frete'].forEach(k=>f[k].addEventListener('input',upd));upd();
+  const step=d=>{const v=Math.max(0,Math.round((parseBR(f.qtd.value)+d)*1000)/1000);f.qtd.value=numIn(v)||'0';f.qtd.dispatchEvent(new Event('input'))};
+  f.qtd.addEventListener('wheel',e=>{if(document.activeElement===f.qtd){e.preventDefault();step(e.deltaY<0?1:-1)}},{passive:false});
+  f.qtd.addEventListener('keydown',e=>{if(e.key==='ArrowUp'){e.preventDefault();step(1)}else if(e.key==='ArrowDown'){e.preventDefault();step(-1)}});
   const er=h('div',{class:'err',role:'alert'});const close=()=>{sheet.textContent=''};
+  const snap=()=>JSON.stringify(Object.values(f).map(i=>i.value));const base=snap();
+  const tryClose=()=>{if(snap()!==base&&!confirm('Há alterações não salvas. Fechar mesmo assim?'))return;close()};
   const L=(t,el)=>h('label',{class:'fld'},h('span',{text:t}),el);
   const read=()=>({codigo:f.codigo.value.trim(),descricao:f.descricao.value.trim(),...cur(),cotacao:f.cotacao.value.trim(),link:f.link.value.trim(),nota:f.nota.value.trim(),emissao:f.emissao.value,
     valorNota:parseBR(f.valorNota.value),pagoEm:f.pagoEm.value,obs:f.obs.value.trim()});
@@ -270,10 +276,10 @@ function openForm(x){
     try{await deleteDoc(doc(fs,'gb_lancamentos',x.id));toast('Lançamento excluído');close()}catch(e){er.textContent=emsg(e)}};
   const dup=async()=>{const d=read();try{const now=Date.now();await setDoc(doc(collection(fs,'gb_lancamentos')),{...d,codigo:nextCode(),nota:'',emissao:'',valorNota:0,pagoEm:'',createdAt:now,createdBy:meEmail,updatedAt:now});toast('Duplicado (sem dados da nota)');close()}catch(e){er.textContent=emsg(e)}};
   const useRec=h('button',{class:'btn small',type:'button',text:'Usar a receita de venda',onclick:()=>{f.valorNota.value=numIn(+calc(cur()).rec.toFixed(2))}});
-  sheet.append(h('div',{class:'overlay',onclick:e=>{if(e.target.classList.contains('overlay'))close()}},
+  sheet.append(h('div',{class:'overlay'},
     h('div',{class:'sheet',role:'dialog','aria-modal':'true'},h('h2',{text:x?'Lançamento':'Novo lançamento'}),
       h('div',{class:'sec',text:'Produto'}),
-      h('div',{class:'g2'},L('Código',f.codigo),L('Quantidade',f.qtd)),L('Descrição do produto',f.descricao),
+      h('div',{class:'g2'},L('Código',f.codigo),L('Quantidade',h('div',{class:'stepper'},h('button',{class:'btn',type:'button',text:'−','aria-label':'Diminuir quantidade',disabled:ro,onclick:()=>step(-1)}),f.qtd,h('button',{class:'btn',type:'button',text:'+','aria-label':'Aumentar quantidade',disabled:ro,onclick:()=>step(1)})))),L('Descrição do produto',f.descricao),
       L('Nº da cotação',f.cotacao),
       L('Link do site da compra',f.link),
       safeUrl(x?.link)?h('div',{class:'acts'},h('a',{class:'btn small',href:safeUrl(x.link),target:'_blank',rel:'noopener noreferrer',text:'Abrir site'})):null,
@@ -285,7 +291,7 @@ function openForm(x){
       h('div',{class:'g3'},L('Nº da nota',f.nota),L('Data de emissão',f.emissao),L('Valor da nota (R$)',f.valorNota)),
       ro?null:h('div',{class:'acts'},useRec),
       L('Data em que foi pago',f.pagoEm),L('Observação',f.obs),er,
-      h('div',{class:'foot'},h('button',{class:'btn',type:'button',text:'Fechar',onclick:close}),
+      h('div',{class:'foot'},h('button',{class:'btn',type:'button',text:'Fechar',onclick:tryClose}),
         ro?null:h('div',{class:'acts'},x?h('button',{class:'btn danger',type:'button',text:'Excluir',onclick:del}):null,
           x?h('button',{class:'btn',type:'button',text:'Duplicar',onclick:dup}):null,
           h('button',{class:'btn primary',type:'button',text:'Salvar',onclick:save}))))));
