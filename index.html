@@ -171,7 +171,7 @@ const mlabel=m=>{const[y,mo]=m.split('-');return['jan','fev','mar','abr','mai','
 function filtered(){
   const t=q.trim().toLowerCase();
   return items.filter(x=>(fMes==='todos'||(x.emissao||'').slice(0,7)===fMes)&&(fStatus==='todos'||status(x)===fStatus)
-    &&(!t||[x.codigo,x.descricao,x.nota,x.cotacao].some(v=>String(v||'').toLowerCase().includes(t))))
+    &&(!t||[x.codigo,x.descricao,x.nota,x.cotacao,x.pedido].some(v=>String(v||'').toLowerCase().includes(t))))
     .sort((a,b)=>String(b.emissao||b.createdAt||'').localeCompare(String(a.emissao||a.createdAt||''))||(b.createdAt||0)-(a.createdAt||0));
 }
 
@@ -205,7 +205,7 @@ function render(){
     ['todos','ag','pago','sn'].map(k=>h('button',{class:'chip','aria-pressed':String(fStatus===k),text:k==='todos'?'Todos':STL[k],onclick:()=>{fStatus=k;render()}})),
     h('select',{class:'m','aria-label':'Mês de emissão',onchange:e=>{fMes=e.target.value;render()}},
       h('option',{value:'todos',text:'Todos os meses',selected:fMes==='todos'}),meses.map(m=>h('option',{value:m,text:mlabel(m),selected:fMes===m})))));
-  const s=h('input',{class:'search',type:'search',placeholder:'Buscar por código, descrição, cotação ou nº da nota',value:q,'aria-label':'Buscar'});
+  const s=h('input',{class:'search',type:'search',placeholder:'Buscar por código, descrição, cotação, pedido ou nº da nota',value:q,'aria-label':'Buscar'});
   s.addEventListener('input',()=>{q=s.value;const p=s.selectionStart;render();const n=$('.search');n.focus();try{n.setSelectionRange(p,p)}catch(e){}});
   app.append(s);
   if(!list.length)app.append(h('div',{class:'empty',text:items.length?'Nada encontrado com esses filtros.':'Nenhum lançamento ainda. Toque em "Novo lançamento".'}));
@@ -217,7 +217,7 @@ function rowEl(x){
   return h('div',{class:'card'},h('div',{class:'row',tabindex:'0',role:'button',onclick:()=>openForm(x),onkeydown:e=>{if(e.key==='Enter')openForm(x)}},
     h('div',{class:'l'},h('span',{class:'cod',text:(x.codigo||'(sem código)')}),h('span',{class:'desc',text:x.descricao||''}),
       h('span',{class:'meta',text:[x.qtd+' un.','compra '+money(x.compra),'venda '+money(x.venda),'ICMS '+pctf(calc(x).rec?calc(x).icms/calc(x).rec:0)+' ('+money(calc(x).icms)+')','frete '+money(x.frete)].join(' · ')}),
-      (x.cotacao||safeUrl(x.link))?h('span',{class:'meta'},x.cotacao?('Cotação '+x.cotacao):'',(x.cotacao&&safeUrl(x.link))?' · ':'',safeUrl(x.link)?h('a',{href:safeUrl(x.link),target:'_blank',rel:'noopener noreferrer',text:'Site da compra',onclick:e=>e.stopPropagation()}):null):null,
+      (x.cotacao||x.pedido||safeUrl(x.link))?h('span',{class:'meta'},[x.cotacao?('Cotação '+x.cotacao):'',x.pedido?('Pedido '+x.pedido):''].filter(Boolean).join(' · '),([x.cotacao,x.pedido].some(Boolean)&&safeUrl(x.link))?' · ':'',safeUrl(x.link)?h('a',{href:safeUrl(x.link),target:'_blank',rel:'noopener noreferrer',text:'Site da compra',onclick:e=>e.stopPropagation()}):null):null,
       h('span',{class:'meta',text:x.nota?('Nota '+x.nota+(x.emissao?' · emitida '+fd(x.emissao):'')+(x.valorNota?' · '+money(x.valorNota):'')+(x.pagoEm?' · pago em '+fd(x.pagoEm):'')):'Nota ainda não emitida'})),
     h('div',{class:'r'},h('span',{class:'val '+(c.lucro<0?'neg':'pos'),text:money(c.lucro)}),h('span',{class:'meta',text:pctf(c.pct)+' de lucro'}),
       h('span',{class:'tag t-'+st,text:STL[st]}))));
@@ -229,6 +229,7 @@ function openForm(x){
   const f={
     codigo:h('input',{value:x?(x.codigo||''):nextCode(),placeholder:'Código do produto',autocomplete:'off'}),
     cotacao:h('input',{value:x?.cotacao||'',placeholder:'Nº da cotação',autocomplete:'off'}),
+    pedido:h('input',{value:x?.pedido||'',placeholder:'Nº do pedido',autocomplete:'off'}),
     link:h('input',{type:'url',value:x?.link||'',placeholder:'https://site-da-compra.com/produto',autocomplete:'off',inputmode:'url'}),
     descricao:h('input',{value:x?.descricao||'',placeholder:'Descrição do produto',autocomplete:'off'}),
     qtd:h('input',{value:x?numIn(x.qtd):'1',inputmode:'decimal'}),
@@ -259,7 +260,7 @@ function openForm(x){
   const snap=()=>JSON.stringify(Object.values(f).map(i=>i.value));const base=snap();
   const tryClose=()=>{if(snap()!==base&&!confirm('Há alterações não salvas. Fechar mesmo assim?'))return;close()};
   const L=(t,el)=>h('label',{class:'fld'},h('span',{text:t}),el);
-  const read=()=>({codigo:f.codigo.value.trim(),descricao:f.descricao.value.trim(),...cur(),cotacao:f.cotacao.value.trim(),link:f.link.value.trim(),nota:f.nota.value.trim(),emissao:f.emissao.value,
+  const read=()=>({codigo:f.codigo.value.trim(),descricao:f.descricao.value.trim(),...cur(),cotacao:f.cotacao.value.trim(),pedido:f.pedido.value.trim(),link:f.link.value.trim(),nota:f.nota.value.trim(),emissao:f.emissao.value,
     valorNota:parseBR(f.valorNota.value),pagoEm:f.pagoEm.value,obs:f.obs.value.trim()});
   const save=async()=>{
     const d=read();
@@ -280,7 +281,7 @@ function openForm(x){
     h('div',{class:'sheet',role:'dialog','aria-modal':'true'},h('h2',{text:x?'Lançamento':'Novo lançamento'}),
       h('div',{class:'sec',text:'Produto'}),
       h('div',{class:'g2'},L('Código',f.codigo),L('Quantidade',h('div',{class:'stepper'},h('button',{class:'btn',type:'button',text:'−','aria-label':'Diminuir quantidade',disabled:ro,onclick:()=>step(-1)}),f.qtd,h('button',{class:'btn',type:'button',text:'+','aria-label':'Aumentar quantidade',disabled:ro,onclick:()=>step(1)})))),L('Descrição do produto',f.descricao),
-      L('Nº da cotação',f.cotacao),
+      h('div',{class:'g2'},L('Nº da cotação',f.cotacao),L('Nº do pedido',f.pedido)),
       L('Link do site da compra',f.link),
       safeUrl(x?.link)?h('div',{class:'acts'},h('a',{class:'btn small',href:safeUrl(x.link),target:'_blank',rel:'noopener noreferrer',text:'Abrir site'})):null,
       h('div',{class:'sec',text:'Valores'}),
@@ -299,10 +300,10 @@ function openForm(x){
 }
 
 function exportCsv(list){
-  const hd=['Código','Descrição','Nº cotação','Link do site','Qtd','Compra unit.','Venda unit.','ICMS %','ICMS R$','Frete','Nº nota','Emissão','Valor nota','Pago em','Custo','Despesas','Receita','Lucro','% lucro','% sobre custo','Situação'];
+  const hd=['Código','Descrição','Nº cotação','Nº pedido','Link do site','Qtd','Compra unit.','Venda unit.','ICMS %','ICMS R$','Frete','Nº nota','Emissão','Valor nota','Pago em','Custo','Despesas','Receita','Lucro','% lucro','% sobre custo','Situação'];
   const n=v=>String(Math.round((+v||0)*100)/100).replace('.',',');
   const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
-  const rows=list.map(x=>{const c=calc(x);return[x.codigo,x.descricao,x.cotacao,x.link,n(x.qtd),n(x.compra),n(x.venda),n(icmsPctOf(x)),n(c.icms),n(x.frete),x.nota,fd(x.emissao),n(x.valorNota),fd(x.pagoEm),n(c.custo),n(c.desp),n(c.rec),n(c.lucro),n(c.pct*100),n(c.mk*100),STL[status(x)]].map(q).join(';')});
+  const rows=list.map(x=>{const c=calc(x);return[x.codigo,x.descricao,x.cotacao,x.pedido,x.link,n(x.qtd),n(x.compra),n(x.venda),n(icmsPctOf(x)),n(c.icms),n(x.frete),x.nota,fd(x.emissao),n(x.valorNota),fd(x.pagoEm),n(c.custo),n(c.desp),n(c.rec),n(c.lucro),n(c.pct*100),n(c.mk*100),STL[status(x)]].map(q).join(';')});
   const blob=new Blob(['﻿'+[hd.map(q).join(';'),...rows].join('\r\n')],{type:'text/csv;charset=utf-8'});
   const a=h('a',{href:URL.createObjectURL(blob),download:'controle-green-blue.csv'});document.body.append(a);a.click();a.remove();
 }
